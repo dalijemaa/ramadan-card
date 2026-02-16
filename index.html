@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بطاقة تهنئة رمضان VIP</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+body{font-family:Tahoma;background:#111;color:#fff;text-align:center;padding:20px;}
+.card{width:400px;margin:50px auto;padding:20px;border-radius:15px;background:linear-gradient(180deg,#1a1a1a,#000);position:relative;box-shadow:0 0 25px gold;overflow:hidden;}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top,#ffd700,#000);opacity:0.1;border-radius:15px;z-index:0;}
+.card h1{color:gold;margin:0 0 10px;position:relative;z-index:2;}
+.card h3{color:#ffeaa7;margin:0 0 10px;position:relative;z-index:2;}
+.card p{color:#fff;margin:10px 0;position:relative;z-index:2;}
+.counter{display:flex;gap:10px;justify-content:center;position:relative;z-index:2;margin-top:10px;}
+.counter div{background:rgba(0,0,0,0.3);padding:6px 10px;border-radius:8px;min-width:60px;}
+button{padding:10px 18px;margin:10px 0;border-radius:8px;font-weight:bold;border:none;cursor:pointer;background:#25D366;color:#fff;}
+#starsCanvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:15px;z-index:1;}
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+<canvas id="starsCanvas"></canvas>
+<h1>🌙 رمضان كريم 🌙</h1>
+<h3 id="cardFrom">من: محمد علي جماعة</h3>
+<p id="cardMsg">كل عام وأنتم بخير بمناسبة حلول شهر رمضان المبارك</p>
+
+<div class="counter">
+  <div><span id="days">--</span> أيام</div>
+  <div><span id="hours">--</span> ساعات</div>
+  <div><span id="minutes">--</span> دقائق</div>
+  <div><span id="seconds">--</span> ثواني</div>
+</div>
+
+<button id="saveBtn">💾 حفظ / تنزيل الصورة</button>
+</div>
+
+<audio id="adhanAudio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto"></audio>
+
+<script>
+// =========================
+// 🔹 النصوص القابلة للتعديل
+// =========================
+let senderName = "محمد علي جماعة";
+let greetingText = "كل عام وأنتم بخير بمناسبة حلول شهر رمضان المبارك";
+let countdownDate = new Date("Feb 18, 2026 00:00:00").getTime();
+
+document.getElementById('cardFrom').innerText = "من: " + senderName;
+document.getElementById('cardMsg').innerText = greetingText;
+
+// =========================
+// 🔹 عداد تنازلي
+// =========================
+function updateCounter(){
+  const now = Date.now();
+  let diff = countdownDate - now;
+  if(diff < 0) diff = 0;
+  const days = Math.floor(diff/(1000*60*60*24));
+  const hours = Math.floor((diff/(1000*60*60))%24);
+  const mins = Math.floor((diff/(1000*60))%60);
+  const secs = Math.floor((diff/1000)%60);
+  document.getElementById('days').innerText = days;
+  document.getElementById('hours').innerText = String(hours).padStart(2,'0');
+  document.getElementById('minutes').innerText = String(mins).padStart(2,'0');
+  document.getElementById('seconds').innerText = String(secs).padStart(2,'0');
+}
+setInterval(updateCounter,1000);
+updateCounter();
+
+// =========================
+// 🔹 خلفية النجوم والهلال
+// =========================
+const canvas = document.getElementById('starsCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = canvas.offsetWidth;
+canvas.height = canvas.offsetHeight;
+
+const stars = [];
+for(let i=0;i<100;i++){
+  stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.5, speed: Math.random()*0.5+0.1});
+}
+
+function drawStars(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = 'white';
+  for(let s of stars){
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fill();
+    s.y -= s.speed;
+    if(s.y < 0) s.y = canvas.height;
+  }
+  // الهلال الذهبي
+  ctx.fillStyle = 'gold';
+  ctx.beginPath();
+  ctx.arc(canvas.width-60,60,25,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#111';
+  ctx.beginPath();
+  ctx.arc(canvas.width-50,50,25,0,Math.PI*2);
+  ctx.fill();
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+// =========================
+// 🔹 زر حفظ / تنزيل الصورة مضمون
+// =========================
+document.getElementById('saveBtn').addEventListener('click', async () => {
+    try {
+        // إنشاء نسخة من البطاقة
+        const canvasElement = await html2canvas(document.getElementById('card'), {scale:2, useCORS:true});
+        // تحويلها إلى Data URL لضمان التنزيل في كل المتصفحات
+        const imageData = canvasElement.toDataURL("image/png");
+        const link = document.createElement('a');
+        link.href = imageData;
+        link.download = "ramadan_vip_card.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch(e) {
+        console.error("خطأ أثناء حفظ الصورة:", e);
+        alert("حدث خطأ أثناء محاولة حفظ الصورة. حاول الضغط على الزر مرة أخرى.");
+    }
+});
+
+// =========================
+// 🔹 صوت التكبيرات عند فتح الصفحة
+// =========================
+window.addEventListener('load', () => {
+    const audio = document.getElementById('adhanAudio');
+    audio.volume = 0.5;
+    audio.play().catch(err => {
+        console.log("لتشغيل الصوت، اضغط على الصفحة:", err);
+    });
+});
+</script>
+
+</body>
+</html>
